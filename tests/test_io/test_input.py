@@ -2,25 +2,12 @@
 
 import unittest
 from unittest.mock import patch, mock_open
-from app.io.input import input_text, read_file_builtin
+from io import StringIO
+import pandas as pd
+from app.io.input import read_file_pandas, read_file_builtin
 
 class TestInput(unittest.TestCase):
-    """Test cases for functions input_text and read_file_builtin (input.py)"""
-
-    @patch('builtins.input', return_value='String text')
-    def test_input_text(self, _mock_input):
-        """Tests input_text with text input"""
-        self.assertEqual(input_text(), 'String text')
-
-    @patch('builtins.input', return_value='')
-    def test_input_empty(self, _mock_input):
-        """Tests input_text with empty input"""
-        self.assertEqual(input_text(), '')
-
-    @patch('builtins.input', return_value='11111111112356')
-    def test_input_numbers(self, _mock_input):
-        """Tests input_text with numerical input"""
-        self.assertEqual(input_text(), '11111111112356')
+    """Test cases for functions read_file_builtin and read_file_builtin (input.py)"""
 
     @patch('builtins.open', new_callable=mock_open, read_data='File text')
     def test_read_file_builtin(self, _mock_file):
@@ -38,6 +25,27 @@ class TestInput(unittest.TestCase):
         """Tests read_file_builtin with multiline file"""
         self.assertEqual(read_file_builtin('fake_path.txt'),
                   'Kyiv\nIs the capital\nOf Great Britain')
+
+    @patch('pandas.read_csv')
+    def test_read_file_pandas(self, mock_read_csv):
+        """Tests read_file_pandas with a CSV"""
+        mock_data = pd.DataFrame({'value1': [1, 2], 'value2': ['1', '2']})
+        mock_read_csv.return_value = mock_data
+        self.assertTrue(read_file_pandas('fake_path.csv').equals(mock_data))
+
+    @patch('pandas.read_csv')
+    def test_read_file_pandas_empty(self, mock_read_csv):
+        """Tests read_file_pandas with an empty CSV"""
+        csv_data = "Name,Age,City\nYaryna,25,Kyiv\nMaria,30,Lviv\nSvyatoslav,22,Odessa"
+        mock_data = pd.read_csv(StringIO(csv_data))
+        mock_read_csv.return_value = mock_data
+        self.assertTrue(read_file_pandas('fake_path.csv').equals(mock_data))
+
+    @patch('pandas.read_csv')
+    def test_read_file_pandas_multiline(self, mock_read_csv):
+        """Tests read_file_pandas with a multiline CSV"""
+        mock_data = pd.DataFrame({'Name': ['Yaryna', 'Maria'], 'Age': [25, 30]})
+        mock_read_csv.return_value = mock_data
 
 
 if __name__ == '__main__':
