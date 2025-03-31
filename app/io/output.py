@@ -1,3 +1,5 @@
+"""Module for output functions"""
+
 def print_text(text):
     """Prints given text to the console.
 

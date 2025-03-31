@@ -1,3 +1,5 @@
+"""Module for input functions"""
+
 import pandas as pd
 
 def input_text():
